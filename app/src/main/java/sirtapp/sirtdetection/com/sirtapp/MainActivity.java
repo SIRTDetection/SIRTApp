@@ -1,13 +1,28 @@
 package sirtapp.sirtdetection.com.sirtapp;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.Image;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Random;
+
+import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +56,62 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap bitmap=(Bitmap)data.getExtras().get("data");
-        image.setImageBitmap(bitmap);
+
+
+     //   Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
+    //    if(isStoragePermissionGranted()) {
+     //       SaveImage(bitmap);
+      //  } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},1);
+            SaveImage(bitmap);
+      // }
+
+       // image.setImageBitmap(bitmap);
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+            //    Log.v(TAG,"Permission is granted");
+                return true;
+            } else {
+
+              //  Log.v(TAG,"Permission is revoked");
+           //     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+        //    Log.v(TAG,"Permission is granted");
+            return true;
+        }
+    }
+    private void SaveImage(Bitmap finalBitmap) {
+
+     //   String root = Environment.getExternalStorageDirectory().toString();
+//        this.getExternalFilesDir()
+//        File myDir = new File(root + "/saved_images");
+//        myDir.mkdirs();
+//        Random generator = new Random();
+//        int n = 10000;
+//        n = generator.nextInt(n);
+//        String fname = "Image-"+ n +".jpg";
+//        File file = new File (myDir, fname);
+        File file = new File(getExternalFilesDir(null), "ImageDemo.png");
+//        System.out.print(file.getAbsolutePath());
+//        if (file.exists ()) file.delete ();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
+
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
