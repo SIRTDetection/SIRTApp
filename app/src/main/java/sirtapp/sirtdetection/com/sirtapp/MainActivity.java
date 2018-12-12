@@ -102,12 +102,12 @@ public class MainActivity extends AppCompatActivity {
         File file = new File(getExternalFilesDir(null), "ImageDemo.png");
 //        System.out.print(file.getAbsolutePath());
 //        if (file.exists ()) file.delete ();
-        try {
-            FileOutputStream out = new FileOutputStream(file);
+        try (FileOutputStream out = new FileOutputStream(file)) {
+//            FileOutputStream out = new FileOutputStream(file);
             finalBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
-
             out.flush();
-            out.close();
+            Conexion.takeImage(out,this);
+//            out.close();
 
         } catch (Exception e) {
             e.printStackTrace();
