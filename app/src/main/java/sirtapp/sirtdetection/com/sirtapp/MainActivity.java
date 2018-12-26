@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,7 +22,8 @@ import java.io.FileOutputStream;
 import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
-
+    int tipo;
+    Uri imageUri;
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
@@ -29,17 +32,30 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+    tipo=0;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    Button button=(Button)findViewById(R.id.camera);
+    Button button1=(Button)findViewById(R.id.camera);
     image =(ImageView)findViewById(R.id.image);
+    Button button2=(Button)findViewById(R.id.gallery);
+
+
+    button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            tipo=1;
+                Intent gallery = new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                startActivityForResult(gallery,100);
+
+            }
+        });
 
 
 
-    button.setOnClickListener(new View.OnClickListener() {
+    button1.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            tipo=0;
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             startActivityForResult(intent,0);
 
@@ -48,22 +64,40 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Bitmap bitmap=(Bitmap)data.getExtras().get("data");
 
 
-     //   Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
-    //    if(isStoragePermissionGranted()) {
-     //       SaveImage(bitmap);
-      //  } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},1);
-            SaveImage(bitmap);
-      // }
+        if(tipo==0){
+            Bitmap bitmap=(Bitmap)data.getExtras().get("data");
+            Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
+            if(isStoragePermissionGranted()) {
+                SaveImage(bitmap);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},1);
+                SaveImage(bitmap);
+            }
 
-       // image.setImageBitmap(bitmap);
+             image.setImageBitmap(bitmap);
+        }else if(tipo==1){
+            Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
+            if(isStoragePermissionGranted()) {
+                loadImage(data);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE},1);
+                loadImage(data);
+            }
+        }
+
+    }
+
+    private void loadImage(Intent data) {
+        imageUri= data.getData();
+        image.setImageURI(imageUri);
     }
 
     public  boolean isStoragePermissionGranted() {
