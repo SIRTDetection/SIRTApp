@@ -9,8 +9,6 @@ import android.telephony.TelephonyManager;
 
 import com.google.gson.Gson;
 
-
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -45,8 +43,8 @@ public class Conexion {
         conn.setRequestMethod("POST");
         FileChannel in  = new FileInputStream(String.valueOf(image)).getChannel();
         WritableByteChannel out = Channels.newChannel(conn.getOutputStream());
-
-        in.transferTo(0,, out);
+        in.transferTo(0,999,out);
+     //   in.transferTo(0,, out);
 
     }
 

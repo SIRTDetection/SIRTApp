@@ -1,6 +1,7 @@
 package sirtapp.sirtdetection.com.sirtapp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -31,13 +32,14 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("native-lib");
     }
     ImageView image;
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    Button button=(Button)findViewById(R.id.button_capture);
-    image =(ImageView)findViewById(R.id.imageView);
+    Button button=(Button)findViewById(R.id.button2);
+    image =(ImageView)findViewById(R.id.image);
 
 
 
