@@ -4,10 +4,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
+import android.widget.ImageView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -30,6 +33,7 @@ public class Conexion {
     public static void takeImage(FileOutputStream image, Context context) throws IOException {
         Conexion.getToken(context);
         Conexion.sendImage(image,context);
+
 
 
     }
@@ -81,5 +85,45 @@ public class Conexion {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("Token", token.getToken());
         editor.apply();
+    }
+
+
+
+
+    public static String reply(Context context) throws IOException {
+        Object tempReply;
+        TelephonyManager tManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        String uuid = tManager.getDeviceId();
+        String urlreply=url+"/device/"+uuid;
+        SharedPreferences preferences = context.getSharedPreferences("SharedPreferences", context.MODE_PRIVATE);
+        String token = "?token=" + preferences.getString("Token",null);
+        URL urlForReply = new URL(urlreply+token);
+        HttpsURLConnection conn = (HttpsURLConnection) urlForReply.openConnection();
+        conn.setRequestMethod("GET");
+
+        tempReply= conn.getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) tempReply));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line+"\n");
+        }
+        br.close();
+        conn.disconnect();
+        return sb.toString();
+
+
+
+
     }
 }

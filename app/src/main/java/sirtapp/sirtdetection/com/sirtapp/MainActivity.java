@@ -15,15 +15,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
     int tipo;
     Uri imageUri;
+    private TextView textReply;
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
@@ -38,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     Button button1=(Button)findViewById(R.id.camera);
     image =(ImageView)findViewById(R.id.image);
     Button button2=(Button)findViewById(R.id.gallery);
+    textReply=(TextView)findViewById(R.id.textReply);
 
 
     button2.setOnClickListener(new View.OnClickListener() {
@@ -85,19 +92,36 @@ public class MainActivity extends AppCompatActivity {
         }else if(tipo==1){
             Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
             if(isStoragePermissionGranted()) {
-                loadImage(data);
+                try {
+                    loadImage(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE},1);
-                loadImage(data);
+                try {
+                    loadImage(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
+        }
+
+        try {
+            textReply.setText(Conexion.reply(this));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
 
-    private void loadImage(Intent data) {
+    private void loadImage(Intent data) throws IOException {
         imageUri= data.getData();
         image.setImageURI(imageUri);
+        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+        this.SaveImage(bitmap);
     }
 
     public  boolean isStoragePermissionGranted() {
