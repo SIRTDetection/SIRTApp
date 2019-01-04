@@ -207,6 +207,7 @@ public class Connection {
                 Log.d(TAG, "Response code: " + serverResponse);
                 if (serverResponse == HttpsURLConnection.HTTP_OK) {
                     Bitmap bitmap = BitmapFactory.decodeStream(connection.getInputStream());
+
                     view.setImageBitmap(bitmap);
                 }
             } catch (Exception e) {

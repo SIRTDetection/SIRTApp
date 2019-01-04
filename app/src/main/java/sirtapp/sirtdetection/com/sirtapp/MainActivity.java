@@ -2,8 +2,11 @@ package sirtapp.sirtdetection.com.sirtapp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
@@ -11,6 +14,8 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
@@ -21,8 +26,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import static android.app.PendingIntent.getActivity;
@@ -58,61 +65,61 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    tipo=0;
+        tipo=0;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    Button button1=(Button)findViewById(R.id.camera);
-    image =(ImageView)findViewById(R.id.image);
-    Button button2=(Button)findViewById(R.id.gallery);
-    textReply=(TextView)findViewById(R.id.textReply);
+        Button button1=(Button)findViewById(R.id.camera);
+        image =(ImageView)findViewById(R.id.image);
+        Button button2=(Button)findViewById(R.id.gallery);
+    //    textReply=(TextView)findViewById(R.id.textReply);
 
 
-    button2.setOnClickListener(new View.OnClickListener() {
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            tipo=1;
+                tipo=1;
                 Intent gallery = new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                startActivityForResult(gallery,100);
+                startActivityForResult(gallery,1);
 
             }
         });
 
 
 
-    button1.setOnClickListener(view -> {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            ImageManager manager = new ImageManager(this);
-            try {
-                photoFile = manager.createNewFile();
-            } catch (IOException ex) {
-                Log.e("MainActivity", "Error while creating new file. Are permissions OK?", ex);
-                AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle("Error")
-                        .setMessage("Error al crear el archivo donde se guardará la imagen")
-                        .setCancelable(true)
-                        .create();
-                dialog.show();
-            }
-            if (photoFile != null) {
-                mImageFile = photoFile;
-                Uri imageUri = FileProvider.getUriForFile(
-                        this,
-                        "sirtapp.sirtdetection.com.sirtapp",
-                        photoFile);
+        button1.setOnClickListener(view -> {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                File photoFile = null;
+                ImageManager manager = new ImageManager(this);
+                try {
+                    photoFile = manager.createNewFile();
+                } catch (IOException ex) {
+                    Log.e("MainActivity", "Error while creating new file. Are permissions OK?", ex);
+                    AlertDialog dialog = new AlertDialog.Builder(this)
+                            .setTitle("Error")
+                            .setMessage("Error al crear el archivo donde se guardará la imagen")
+                            .setCancelable(true)
+                            .create();
+                    dialog.show();
+                }
+                if (photoFile != null) {
+                    mImageFile = photoFile;
+                    Uri imageUri = FileProvider.getUriForFile(
+                            this,
+                            "sirtapp.sirtdetection.com.sirtapp",
+                            photoFile);
 //                takePictureIntent.putExtra(EXTRA_OUTPUT, photoUri.toString());
 //                takePictureIntent.putExtra(EXTRA_OUTPUT, photoUri.toString());
-                takePictureIntent.putExtra(EXTRA_OUTPUT, imageUri);
-                startActivityForResult(takePictureIntent, INTENT_TAKE_PHOTO);
+                    takePictureIntent.putExtra(EXTRA_OUTPUT, imageUri);
+                    startActivityForResult(takePictureIntent, INTENT_TAKE_PHOTO);
+                }
             }
-        }
         /*tipo=0;
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //            intent.setType("image/*");
         startActivityForResult(intent,0);*/
 
-    });
+        });
 
     }
 
@@ -149,6 +156,14 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
                         }*/
                     }
                     mImageFile = null;
+                    break;
+                case 1:
+                    try {
+                        loadImage(data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
         }
         if (requestCode == 0 && resultCode == RESULT_OK) {
@@ -166,8 +181,6 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
     /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-
         if(requestCode == 0 && resultCode == Activity.RESULT_OK) {
             try {
                 InputStream stream = getContentResolver().openInputStream(data.getData());
@@ -184,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 //            image.setImageBitmap(bitmap);
         }else if(tipo==100){
             Log.d("MainActivity", String.valueOf(isStoragePermissionGranted()));
@@ -202,7 +214,6 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }*/
 
@@ -230,36 +241,45 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
 
     private void loadImage(Intent data) throws IOException {
         imageUri= data.getData();
-        System.out.println(imageUri);
-        image.setImageURI(imageUri);
-        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+        File file = new File(getPathFromUri(this,imageUri));
+
+        uploadImage(file);
+
+
+
+
+
+       // File file =new File(imageUri.getPath());
+//        System.out.println(imageUri);
+//        image.setImageURI(imageUri);
+//        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
 //        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 //        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 //        this.SaveImage(bitmap);
-        uploadImage(bitmap);
+
     }
 
     public  boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-            //    Log.v(TAG,"Permission is granted");
+                //    Log.v(TAG,"Permission is granted");
                 return true;
             } else {
 
-              //  Log.v(TAG,"Permission is revoked");
-           //     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                //  Log.v(TAG,"Permission is revoked");
+                //     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
                 return false;
             }
         }
         else { //permission is automatically granted on sdk<23 upon installation
-        //    Log.v(TAG,"Permission is granted");
+            //    Log.v(TAG,"Permission is granted");
             return true;
         }
     }
     private void SaveImage(Bitmap finalBitmap) {
 
-     //   String root = Environment.getExternalStorageDirectory().toString();
+        //   String root = Environment.getExternalStorageDirectory().toString();
 //        this.getExternalFilesDir()
 //        File myDir = new File(root + "/saved_images");
 //        myDir.mkdirs();
@@ -275,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
 //            FileOutputStream out = new FileOutputStream(file);
             finalBitmap.compress(Bitmap.CompressFormat.PNG, 50, out);
             out.flush();
-            Conexion.takeImage(out,this);
+       //     Conexion.takeImage(out,this);
 //            out.close();
 
         } catch (Exception e) {
@@ -324,7 +344,128 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
             Log.w("MainActivity", "Error while obtaining image - status code: " + serverResponseCode);
         }
     }
+    public static String getPathFromUri(final Context context, final Uri uri) {
 
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+
+                // TODO handle non-primary volumes
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                return getDataColumn(context, contentUri, null, null);
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] {
+                        split[1]
+                };
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            // Return the remote address
+            if (isGooglePhotosUri(uri))
+                return uri.getLastPathSegment();
+
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    public static String getDataColumn(Context context, Uri uri, String selection,
+                                       String[] selectionArgs) {
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    public static boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
     @Override
     public void onCancelled() {
         Log.w("MainActivity", "Upload job cancelled");
