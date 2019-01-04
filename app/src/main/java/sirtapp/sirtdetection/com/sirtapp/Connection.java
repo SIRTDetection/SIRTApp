@@ -19,6 +19,7 @@
 package sirtapp.sirtdetection.com.sirtapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -165,6 +166,7 @@ public class Connection {
         httpsThread.start();
         try {
             httpsThread.join();
+          //  Result.mostar(imageBitmap[0]);
             instance.onImageDownloadCompleted(imageBitmap[0]);
         } catch (InterruptedException ignored) {}
     }

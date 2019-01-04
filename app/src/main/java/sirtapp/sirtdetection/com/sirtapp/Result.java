@@ -11,6 +11,9 @@ static ImageView result,image;
 public Result(ImageView image){
     this.image=image;
 }
+public Result(){
+
+}
     public static void mostar(Bitmap bitmap) {
         result.setImageBitmap(bitmap);
     }

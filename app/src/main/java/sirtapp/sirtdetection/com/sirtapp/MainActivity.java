@@ -34,7 +34,9 @@ import java.io.IOException;
 
 import static android.app.PendingIntent.getActivity;
 import static android.provider.MediaStore.EXTRA_OUTPUT;
-
+import ozaydin.serkan.com.image_zoom_view.ImageViewZoom;
+import ozaydin.serkan.com.image_zoom_view.ImageViewZoomConfig;
+import ozaydin.serkan.com.image_zoom_view.SaveFileListener;
 public class MainActivity extends AppCompatActivity implements SingleUploadBroadcastReceiver
         .Delegate {
     private static final int INTENT_TAKE_PHOTO = 3;
@@ -174,8 +176,17 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
         }
     }
 
+    @SuppressLint("WrongViewCast")
     public void onImageDownloadCompleted(@NonNull Bitmap imageBitmap) {
-        image.setImageBitmap(imageBitmap);
+        ImageViewZoom imageZoom;
+        imageZoom=findViewById(R.id.image);
+        imageZoom.getBase64();
+        ImageViewZoomConfig imageViewZoomConfig=new ImageViewZoomConfig();
+        imageViewZoomConfig.saveProperty(true);
+        ImageViewZoomConfig.ImageViewZoomConfigSaveMethod imageViewZoomConfigSaveMethod= ImageViewZoomConfig.ImageViewZoomConfigSaveMethod.onlyOnDialog;
+        imageViewZoomConfig.setImageViewZoomConfigSaveMethod(imageViewZoomConfigSaveMethod);
+        imageZoom.setConfig(imageViewZoomConfig);
+        imageZoom.setImageBitmap(imageBitmap);
     }
 
     /*@Override
@@ -230,10 +241,15 @@ public class MainActivity extends AppCompatActivity implements SingleUploadBroad
         connection.obtainToken("J9889");
 //        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 //        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+    //    Intent intentLoadNewActivity = new Intent(MainActivity.this, Result.class);
+      //  startActivity(intentLoadNewActivity);
+
         connection.uploadPicture(bitmap, image);
     }
 
     private void uploadImage(File imageFile) {
+     //   Intent intentLoadNewActivity = new Intent(MainActivity.this, Result.class);
+      //  startActivity(intentLoadNewActivity);
         Connection connection = new Connection(this);
         connection.obtainToken("J9889");
         connection.uploadPicture(imageFile, this);
