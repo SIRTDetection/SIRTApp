@@ -24,7 +24,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="sirtapp.sirtdetection.com.sirtapp"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -33,13 +33,13 @@
                 android:resource="@xml/file_paths" />
         </provider>
         <activity
-            android:name=".Result"
+            android:name=".utils.images.Result"
 
             android:screenOrientation="portrait" />
 
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:exported="true"
             >

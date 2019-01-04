@@ -16,7 +16,7 @@
 
  * Created by Javinator9889 on 3/01/19 - SecurePass.
  */
-package sirtapp.sirtdetection.com.sirtapp;
+package sirtapp.sirtdetection.com.sirtapp.utils.images;
 
 import android.content.Context;
 import android.os.Environment;

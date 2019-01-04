@@ -16,42 +16,32 @@
 
  * Created by Javinator9889 on 2/01/19 - SecurePass.
  */
-package sirtapp.sirtdetection.com.sirtapp;
+package sirtapp.sirtdetection.com.sirtapp.net;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.ImageView;
-
-import net.gotev.uploadservice.MultipartUploadRequest;
-import net.gotev.uploadservice.MultipartUploadTask;
-import net.gotev.uploadservice.UploadNotificationConfig;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import androidx.annotation.NonNull;
+import sirtapp.sirtdetection.com.sirtapp.activities.MainActivity;
 
 public class Connection {
     public static final String BASE_URL = "https://vpnservice.ddns.net/flsk";
@@ -94,27 +84,6 @@ public class Connection {
         connectionThread.start();
     }
 
-    public void uploadPicture(@NonNull File imageFile) {
-        String token = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE)
-                .getString("token", null);
-        String uploadURL = BASE_URL + "/sirt?token=" + token;
-        try {
-            new MultipartUploadRequest(mContext, "J9889", uploadURL)
-                    .addFileToUpload(imageFile.getAbsolutePath(),
-                            "picture",
-                            imageFile.getName(),
-                            "image/jpeg")
-//                    .addFileToUpload(imageFile.getAbsolutePath(), "data")
-//                    .setNotificationConfig(new UploadNotificationConfig())
-                    .setMaxRetries(2)
-                    .startUpload();
-        } catch (FileNotFoundException | MalformedURLException ex) {
-            Log.w(TAG, "Error while trying to upload the picture", ex);
-        } catch (Exception e) {
-            Log.w(TAG, "General error captured", e);
-        }
-    }
-
     public void uploadPicture(@NonNull File imageFile, MainActivity instance) {
         String token = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE)
                 .getString("token", null);
@@ -154,8 +123,6 @@ public class Connection {
                     Log.d(TAG, "HTTPS OK");
                     InputStream body = connection.getInputStream();
                     imageBitmap[0] = BitmapFactory.decodeStream(body);
-//                    instance.onImageDownloadCompleted(imageBitmap);
-//                    view.setImageBitmap(imageBitmap);
                 }
             } catch (MalformedURLException mue) {
                 Log.e(TAG, "The URL is not correctly set-up", mue);
@@ -166,56 +133,8 @@ public class Connection {
         httpsThread.start();
         try {
             httpsThread.join();
-          //  Result.mostar(imageBitmap[0]);
             instance.onImageDownloadCompleted(imageBitmap[0]);
-        } catch (InterruptedException ignored) {}
-    }
-
-    public void uploadPicture(@NonNull Bitmap image, ImageView view) {
-        Thread connectionThread = new Thread(() -> {
-            String token = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE)
-                    .getString("token", null);
-            try {
-                URL destinationUrl = new URL(BASE_URL + "/sirt?token=" + token);
-                URLConnection c = destinationUrl.openConnection();
-                Log.d(TAG, "Connection to URL: " + destinationUrl);
-                HttpsURLConnection connection = (HttpsURLConnection) destinationUrl
-                        .openConnection();
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-                connection.setRequestMethod("POST");
-//                DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
-//                image.writeTo(outputStream);
-//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                image.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//                byte[] imageBytes = baos.toByteArray();
-//                String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-//                connection.getOutputStream().write(encodedImage.getBytes());
-//                connection.getOutputStream().close();
-//                image.compress(Bitmap.CompressFormat.PNG, 100, connection.getOutputStream());
-//                connection.getOutputStream().write(image.toByteArray());
-//                BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
-//                image.compress(Bitmap.CompressFormat.PNG, 100, out);
-//                out.flush();
-//                out.close();
-//                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                image.compress(Bitmap.CompressFormat.JPEG, 100, connection.getOutputStream());
-//                stream.writeTo(connection.getOutputStream());
-//                byte[] imageBytes = stream.toByteArray();
-//                ByteArrayEntity entity = new ByteArrayEntity(imageBytes);
-//                entity.writeTo(connection.getOutputStream());
-                connection.connect();
-                int serverResponse = connection.getResponseCode();
-                Log.d(TAG, "Response code: " + serverResponse);
-                if (serverResponse == HttpsURLConnection.HTTP_OK) {
-                    Bitmap bitmap = BitmapFactory.decodeStream(connection.getInputStream());
-
-                    view.setImageBitmap(bitmap);
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "Exception while uploading image", e);
-            }
-        });
-        connectionThread.start();
+        } catch (InterruptedException ignored) {
+        }
     }
 }
