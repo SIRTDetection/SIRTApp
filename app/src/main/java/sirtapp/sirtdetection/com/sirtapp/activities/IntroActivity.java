@@ -55,13 +55,13 @@ public class IntroActivity extends AppIntro {
         SliderPage secondSlide = new SliderPage();
         secondSlide.setTitle(getString(R.string.second_slide_title));
         secondSlide.setDescription(getString(R.string.second_slide_content));
-        secondSlide.setImageDrawable(R.drawable.ic_github);
+        secondSlide.setImageDrawable(R.drawable.github);
         secondSlide.setBgColor(Color.BLUE);
 
         SliderPage thirdSlide = new SliderPage();
         thirdSlide.setTitle(getString(R.string.permissions_slide));
         thirdSlide.setDescription(getString(R.string.storage_permissions));
-        thirdSlide.setImageDrawable(android.R.drawable.ic_menu_camera);
+        thirdSlide.setImageDrawable(R.drawable.folder);
         thirdSlide.setBgColor(Color.BLUE);
 
         SliderPage fourthSlide = new SliderPage();
@@ -108,7 +108,7 @@ public class IntroActivity extends AppIntro {
 
     private void startMainActivity() {
         Intent mainActivity = new Intent(this, MainActivity.class);
-        mainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        mainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(mainActivity);
         finish();
     }

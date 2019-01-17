@@ -24,6 +24,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
 
 public class ProgressDialog {
     private MaterialDialog mDialog;
@@ -40,18 +41,22 @@ public class ProgressDialog {
                 .build();
     }
 
+    @UiThread
     public void updateTitle(@StringRes int title) {
         mDialog.setTitle(title);
     }
 
+    @UiThread
     public void updateBody(@StringRes int body) {
         mDialog.setContent(body);
     }
 
+    @UiThread
     public void show() {
         mDialog.show();
     }
 
+    @UiThread
     public void dismiss() {
         mDialog.dismiss();
     }

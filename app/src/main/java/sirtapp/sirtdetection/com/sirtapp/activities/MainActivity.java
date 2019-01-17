@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.github.piasy.biv.loader.fresco.FrescoImageLoader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
     private static final short INTENT_OPEN_GALLERY = 1;
     private static final short INTENT_TAKE_PHOTO = 2;
     private static final String TAG = "MainActivity";
+    private String mUUID;
     private File mImageFile = null;
     private ImageView mImageView;
     private ProgressDialog mDialog;
@@ -48,7 +51,12 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        SharedPreferences preferences = getSharedPreferences("userPrefs", Context.MODE_PRIVATE);
+        mUUID = preferences.getString("UUID", null);
+        if (mUUID == null) {
+            mUUID = UUID.randomUUID().toString();
+            preferences.edit().putString("UUID", mUUID).apply();
+        }
         Button cameraButton = findViewById(R.id.camera);
         mImageView = findViewById(R.id.image);
         Button galleryButton = findViewById(R.id.gallery);
@@ -77,20 +85,33 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
         }
     }
 
-    public void onImageDownloadCompleted(@NonNull Bitmap imageBitmap) {
-        mImageView.setImageBitmap(imageBitmap);
-        File tempFile = new File(getCacheDir(), "tmpimg.jpg");
-        if (mDialog != null)
-            mDialog.dismiss();
-        try {
-            tempFile.createNewFile();
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(tempFile));
-            Intent showBigImageIntent = new Intent(this, ImageViewer.class);
-            showBigImageIntent.putExtra("picture", tempFile);
-            startActivity(showBigImageIntent);
-        } catch (IOException e) {
-            Log.w(TAG, "Unexpected exception!", e);
-        }
+    public void onImageDownloadCompleted(Bitmap imageBitmap, File source) {
+        runOnUiThread(() -> {
+            mImageView.setImageBitmap(imageBitmap);
+            File tempFile = new File(ImageManager.getExternalStorageDir(), source.getName().replace("-org", "-inf"));
+            Log.d(TAG, tempFile.getAbsolutePath());
+            if (mDialog != null)
+                mDialog.dismiss();
+            if (imageBitmap == null) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.error_title)
+                        .setMessage(R.string.error_server_response)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setCancelable(false)
+                        .setPositiveButton(android.R.string.ok, (self, which) -> self.dismiss())
+                        .create().show();
+                return;
+            }
+            try {
+                tempFile.createNewFile();
+                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(tempFile));
+                Intent showBigImageIntent = new Intent(this, ImageViewer.class);
+                showBigImageIntent.putExtra("picture", tempFile);
+                startActivity(showBigImageIntent);
+            } catch (IOException e) {
+                Log.w(TAG, "Unexpected exception!", e);
+            }
+        });
     }
 
     private void uploadImage(File imageFile) {
@@ -99,12 +120,9 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
                 R.string.dialog_title,
                 R.string.dialog_content_1);
         mDialog.show();
-        String UUID = getSharedPreferences("userPrefs", Context.MODE_PRIVATE).getString("UUID",
-                "SIRTApp");
-        if (UUID == null)
-            UUID = "SIRTApp";
-        connection.obtainToken(UUID);
-        connection.uploadPicture(imageFile, mDialog, this);
+        connection.startInference(mUUID, imageFile, mDialog, this);
+//        connection.obtainToken(mUUID);
+//        connection.uploadPicture(imageFile, mDialog, this);
     }
 
     private void loadImage(Intent data) {

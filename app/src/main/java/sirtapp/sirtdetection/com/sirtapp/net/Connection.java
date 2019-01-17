@@ -58,13 +58,25 @@ public class Connection implements OnThreadCompletedListener {
     private Context mContext;
     private AtomicReference<Bitmap> mResult;
     private MainActivity mInstance;
+    private File mImageFile;
+    private ProgressDialog mDialog;
 
     public Connection(@NonNull Context context) {
         mContext = context;
     }
 
+    public void startInference(@NonNull String deviceUuid,
+                               @NonNull File imageFile,
+                               @NonNull ProgressDialog dialog,
+                               @NonNull MainActivity instance) {
+        mImageFile = imageFile;
+        mInstance = instance;
+        mDialog = dialog;
+        obtainToken(deviceUuid);
+    }
+
     public void obtainToken(@NonNull String deviceUuid) {
-        Thread connectionThread = new Thread(() -> {
+        NotifyingThread connectionThread = new NotifyingThread(() -> {
             try {
                 URL url = null;
                 try {
@@ -82,46 +94,42 @@ public class Connection implements OnThreadCompletedListener {
                 Log.i(TAG, jsonBuilder.toString());
                 JSONObject json = new JSONObject(jsonBuilder.toString());
                 String token = json.getString("token");
-                SharedPreferences.Editor editor = mContext.getSharedPreferences("userPrefs",
-                        Context.MODE_PRIVATE).edit();
-                editor.putString("token", token);
-                editor.apply();
+                SharedPreferences preferences = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE);
+                String prefsToken = preferences.getString("token", null);
+                if ((prefsToken == null) || !prefsToken.equals(token)) {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("token", token);
+                    editor.apply();
+                }
             } catch (IOException ex) {
                 Log.w(TAG, "Exception occurred during connection opening", ex);
             } catch (JSONException jsonEx) {
                 Log.w(TAG, "JSONException occurred...", jsonEx);
             }
-        });
+        }, this);
+        connectionThread.setName("connectionThread");
         connectionThread.start();
-        try {
-            connectionThread.join();
-        } catch (InterruptedException ex) {
-            throw new RuntimeException("Error while obtaining the token - interrupted!", ex);
-        }
     }
 
-    public void uploadPicture(final @NonNull File imageFile,
-                              final @NonNull ProgressDialog dialog,
-                              final @NonNull MainActivity instance) {
-        mInstance = instance;
+    public void uploadPicture() {
         NotifyingThread httpsThread = new NotifyingThread(this);
-        ArgumentParser parser = new ArgumentParser(3);
-        parser.putParam("file", imageFile);
-        parser.putParam("dialog", dialog);
+//        ArgumentParser parser = new ArgumentParser(3);
+//        parser.putParam("file", imageFile);
+//        parser.putParam("dialog", dialog);
         mResult = new AtomicReference<>();
-        httpsThread.setExecutable(this::uploadPictureTask, parser, mResult);
+        httpsThread.setExecutable(this::uploadPictureTask, mResult);
+        httpsThread.setName("httpsThread");
         httpsThread.start();
     }
 
-    private Bitmap uploadPictureTask(ArgumentParser args) {
+    private Bitmap uploadPictureTask() {
         String token = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE)
                 .getString("token", null);
         String uploadURL = BASE_URL + "/sirt?token=" + token;
-        File imageFile = (File) args.get("file");
-        ProgressDialog dialog = (ProgressDialog) args.get("dialog");
         try {
             URL url = new URL(uploadURL);
             Log.d(TAG, String.format("Opening connection to URL: %s", url.toString()));
+            mInstance.runOnUiThread(() -> mDialog.updateBody(R.string.dialog_content_2));
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 
             String boundary = UUID.randomUUID().toString();
@@ -136,12 +144,11 @@ public class Connection implements OnThreadCompletedListener {
             request.writeBytes("--" + boundary + "\r\n");
             request.writeBytes("Content-Disposition: form-data; " +
                     "name=\"picture\"; " +
-                    "filename=\"" + imageFile.getName() + "\"\r\n\r\n");
-            request.write(FileUtils.readFileToByteArray(imageFile));
+                    "filename=\"" + mImageFile.getName() + "\"\r\n\r\n");
+            request.write(FileUtils.readFileToByteArray(mImageFile));
             request.writeBytes("\r\n");
             request.writeBytes("--" + boundary + "--\r\n");
-
-            dialog.updateBody(R.string.dialog_content_2);
+            mInstance.runOnUiThread(() -> mDialog.updateBody(R.string.dialog_content_3));
             request.flush();
             Log.d(TAG, "Data uploaded!");
 
@@ -152,7 +159,6 @@ public class Connection implements OnThreadCompletedListener {
                 Log.w(TAG, String.format("Server replied error %d", response));
             else {
                 Log.d(TAG, "HTTPS OK");
-                dialog.updateBody(R.string.dialog_content_3);
                 InputStream body = connection.getInputStream();
                 return BitmapFactory.decodeStream(body);
             }
@@ -178,6 +184,18 @@ public class Connection implements OnThreadCompletedListener {
      */
     @Override
     public void onThreadCompletedListener(@NotNull Thread thread, @Nullable Throwable exception) {
-        mInstance.onImageDownloadCompleted(mResult.get());
+        if (exception != null)
+            Log.w(TAG, "Exception occurred during thread execution", exception);
+        switch (thread.getName()) {
+            case "httpsThread":
+                mInstance.onImageDownloadCompleted(mResult.get(), mImageFile);
+                break;
+            case "connectionThread":
+                uploadPicture();
+                break;
+            default:
+                Log.w(TAG, "Unexpected case - thread info: " + thread);
+                break;
+        }
     }
 }

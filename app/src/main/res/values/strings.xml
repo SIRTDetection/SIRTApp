@@ -6,9 +6,10 @@
     <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
 
     <string name="dialog_title">Running inference…</string>
-    <string name="dialog_content_1">Uploading picture to server… (1/3)</string>
-    <string name="dialog_content_2">Detecting objects in the picture… (2/3)</string>
-    <string name="dialog_content_3">Downloading results… (3/3)</string>
+    <string name="dialog_content_1">Stabilising connection… (1/4)</string>
+    <string name="dialog_content_2">Uploading picture to server… (2/4)</string>
+    <string name="dialog_content_3">Detecting objects in the picture… (3/4)</string>
+    <string name="dialog_content_4">Downloading results… (4/4)</string>
 
     <string name="first_slide_title" translatable="false">SIRT</string>
     <string name="first_slide_content">An application for Sistemas Inteligentes whose
@@ -16,15 +17,20 @@
 
     <string name="second_slide_title" translatable="false">GitHub</string>
     <string name="second_slide_content">All the documentation, code, explanations and resources are
-        available at GitHub, at the following URL: https://github.com/SIRTDetection</string>
+        available at GitHub, at the following URL:\nhttps://github.com/SIRTDetection</string>
 
     <string name="permissions_slide">Permissions</string>
     <string name="storage_permissions">We need storage permissions for accessing your
         gallery when you need it</string>
-    <string name="extra_permissions">In addition, this app will use:         - Internet permissions (for uploading/downloading content).        - Basic phone state permissions (private storage).        - Camera: the application will use your preferred camera app.</string>
+    <string name="extra_permissions">In addition, this app will use:\n\n
+        - Internet permissions (for uploading/downloading content).\n
+        - Basic phone state permissions (private storage).\n
+        - Camera: the application will use your preferred camera app.</string>
     <string name="error_title" translatable="false">Error</string>
     <string name="error_no_pic">There is an error while accessing the picture from gallery.
     Is it downloaded in your device (not uploaded to Google Photos, for example)?</string>
     <string name="error_save_file">There is an error while trying to create the image file.
     Are enough permissions?</string>
+    <string name="error_server_response">There was an error processing the image - maybe
+        the format is not recognised</string>
 </resources>

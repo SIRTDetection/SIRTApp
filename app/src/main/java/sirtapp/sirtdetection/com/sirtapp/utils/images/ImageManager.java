@@ -37,7 +37,28 @@ public class ImageManager {
     public File createNewFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFilename = "JPEG_" + timeStamp + "-org";
-        File storageDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFilename, ".jpg", storageDir);
+        if (isExternalStorageReadable() && isExternalStorageWritable()) {
+            File storageDir = getExternalStorageDir();
+            if (!storageDir.exists())
+                if (!storageDir.mkdirs())
+                    throw new IOException("Unable to create the public pictures directory");
+            return File.createTempFile(imageFilename, ".jpg", storageDir);
+        } else
+            throw new IOException("Insufficient permissions");
+    }
+
+    public static File getExternalStorageDir() {
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "SIRTApp");
+    }
+
+    private boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
+    }
+
+    private boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
 }
