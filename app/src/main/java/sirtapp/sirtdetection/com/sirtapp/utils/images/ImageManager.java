@@ -36,7 +36,7 @@ public class ImageManager {
 
     public File createNewFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        String imageFilename = "JPEG_" + timeStamp + "_";
+        String imageFilename = "JPEG_" + timeStamp + "-org";
         File storageDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         return File.createTempFile(imageFilename, ".jpg", storageDir);
     }

@@ -6,7 +6,7 @@ android {
         applicationId "sirtapp.sirtdetection.com.sirtapp"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 20
+        versionCode 22
         versionName "1.0b"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -41,6 +41,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.versionedparcelable:versionedparcelable:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
@@ -50,4 +51,14 @@ dependencies {
     implementation 'com.github.piasy:BigImageViewer:1.5.6'
     // load with fresco
     implementation 'com.github.piasy:FrescoImageLoader:1.5.6'
+    // support thumbnail, gif and webp with Fresco
+    implementation 'com.github.piasy:FrescoImageViewFactory:1.5.6'
+    api('com.github.filippudak.progresspieview:library:1.0.4')
+    // MaterialDialogs - https://github.com/afollestad/material-dialogs
+//    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    // AppIntro - https://github.com/paolorotolo/AppIntro
+    implementation 'com.github.paolorotolo:appintro:v5.1.0'
+    // ThreadingTools - https://github.com/Javinator9889/ThreadingTools
+    implementation 'com.github.javinator9889:threadingtools:1.0'
 }

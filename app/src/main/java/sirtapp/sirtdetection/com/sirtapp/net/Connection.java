@@ -24,7 +24,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.github.javinator9889.threading.threads.notifyingthread.NotifyingThread;
+import com.github.javinator9889.threading.threads.notifyingthread.OnThreadCompletedListener;
+import com.github.javinator9889.utils.ArgumentParser;
+
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,16 +43,21 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import androidx.annotation.NonNull;
+import sirtapp.sirtdetection.com.sirtapp.R;
 import sirtapp.sirtdetection.com.sirtapp.activities.MainActivity;
+import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressDialog;
 
-public class Connection {
+public class Connection implements OnThreadCompletedListener {
     public static final String BASE_URL = "https://vpnservice.ddns.net/flsk";
     private static final String TAG = "Connection";
     private Context mContext;
+    private AtomicReference<Bitmap> mResult;
+    private MainActivity mInstance;
 
     public Connection(@NonNull Context context) {
         mContext = context;
@@ -82,59 +93,91 @@ public class Connection {
             }
         });
         connectionThread.start();
+        try {
+            connectionThread.join();
+        } catch (InterruptedException ex) {
+            throw new RuntimeException("Error while obtaining the token - interrupted!", ex);
+        }
     }
 
-    public void uploadPicture(@NonNull File imageFile, MainActivity instance) {
+    public void uploadPicture(final @NonNull File imageFile,
+                              final @NonNull ProgressDialog dialog,
+                              final @NonNull MainActivity instance) {
+        mInstance = instance;
+        NotifyingThread httpsThread = new NotifyingThread(this);
+        ArgumentParser parser = new ArgumentParser(3);
+        parser.putParam("file", imageFile);
+        parser.putParam("dialog", dialog);
+        mResult = new AtomicReference<>();
+        httpsThread.setExecutable(this::uploadPictureTask, parser, mResult);
+        httpsThread.start();
+    }
+
+    private Bitmap uploadPictureTask(ArgumentParser args) {
         String token = mContext.getSharedPreferences("userPrefs", Context.MODE_PRIVATE)
                 .getString("token", null);
         String uploadURL = BASE_URL + "/sirt?token=" + token;
-        final Bitmap[] imageBitmap = new Bitmap[1];
-        Thread httpsThread = new Thread(() -> {
-            try {
-                URL url = new URL(uploadURL);
-                Log.d(TAG, String.format("Opening connection to URL: %s", url.toString()));
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-
-                String boundary = UUID.randomUUID().toString();
-                Log.d(TAG, "Connection boundary: " + boundary);
-                Log.d(TAG, "Setting up connection protocols");
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-
-                Log.d(TAG, "Obtaining the output stream");
-                DataOutputStream request = new DataOutputStream(connection.getOutputStream());
-                request.writeBytes("--" + boundary + "\r\n");
-                request.writeBytes("Content-Disposition: form-data; " +
-                        "name=\"picture\"; " +
-                        "filename=\"" + imageFile.getName() + "\"\r\n\r\n");
-                request.write(FileUtils.readFileToByteArray(imageFile));
-                request.writeBytes("\r\n");
-                request.writeBytes("--" + boundary + "--\r\n");
-                request.flush();
-                Log.d(TAG, "Data uploaded!");
-
-                int response = connection.getResponseCode();
-                Log.d(TAG, "Server response: " + response);
-
-                if (response != 200)
-                    Log.w(TAG, String.format("Server replied error %d", response));
-                else {
-                    Log.d(TAG, "HTTPS OK");
-                    InputStream body = connection.getInputStream();
-                    imageBitmap[0] = BitmapFactory.decodeStream(body);
-                }
-            } catch (MalformedURLException mue) {
-                Log.e(TAG, "The URL is not correctly set-up", mue);
-            } catch (IOException io) {
-                Log.e(TAG, "An exception while reading/writing occurred", io);
-            }
-        });
-        httpsThread.start();
+        File imageFile = (File) args.get("file");
+        ProgressDialog dialog = (ProgressDialog) args.get("dialog");
         try {
-            httpsThread.join();
-            instance.onImageDownloadCompleted(imageBitmap[0]);
-        } catch (InterruptedException ignored) {
+            URL url = new URL(uploadURL);
+            Log.d(TAG, String.format("Opening connection to URL: %s", url.toString()));
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+            String boundary = UUID.randomUUID().toString();
+            Log.d(TAG, "Connection boundary: " + boundary);
+            Log.d(TAG, "Setting up connection protocols");
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+
+            Log.d(TAG, "Obtaining the output stream");
+            DataOutputStream request = new DataOutputStream(connection.getOutputStream());
+            request.writeBytes("--" + boundary + "\r\n");
+            request.writeBytes("Content-Disposition: form-data; " +
+                    "name=\"picture\"; " +
+                    "filename=\"" + imageFile.getName() + "\"\r\n\r\n");
+            request.write(FileUtils.readFileToByteArray(imageFile));
+            request.writeBytes("\r\n");
+            request.writeBytes("--" + boundary + "--\r\n");
+
+            dialog.updateBody(R.string.dialog_content_2);
+            request.flush();
+            Log.d(TAG, "Data uploaded!");
+
+            int response = connection.getResponseCode();
+            Log.d(TAG, "Server response: " + response);
+
+            if (response != 200)
+                Log.w(TAG, String.format("Server replied error %d", response));
+            else {
+                Log.d(TAG, "HTTPS OK");
+                dialog.updateBody(R.string.dialog_content_3);
+                InputStream body = connection.getInputStream();
+                return BitmapFactory.decodeStream(body);
+            }
+        } catch (MalformedURLException mue) {
+            Log.e(TAG, "The URL is not correctly set-up", mue);
+        } catch (IOException io) {
+            Log.e(TAG, "An exception while reading/writing occurred", io);
         }
+        return null;
+    }
+
+    /**
+     * When a thread finish its execution, if using a {@link NotifyingThread} and the class is
+     * subscribed, this method is called, with the {@code Runnable} which corresponds the just
+     * finished thread, and the {@code Throwable} containing the exception (if any exception has
+     * benn thrown).
+     * <p>
+     * Refer to {@link NotifyingThread#addOnThreadCompletedListener(OnThreadCompletedListener)} for
+     * getting more information about subscribing classes.
+     *
+     * @param thread    the thread that has just finished its execution.
+     * @param exception the exception if happened, else {@code null}.
+     */
+    @Override
+    public void onThreadCompletedListener(@NotNull Thread thread, @Nullable Throwable exception) {
+        mInstance.onImageDownloadCompleted(mResult.get());
     }
 }
