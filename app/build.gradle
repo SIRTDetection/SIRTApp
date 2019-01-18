@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     // Android X - AppCompat libraries
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
     implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0-alpha01'
@@ -46,16 +46,16 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     // Apache Commons IO - https://commons.apache.org/io/
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation 'commons-io:commons-io:2.6'
     // BigImageViewer - https://github.com/Piasy/BigImageViewer
     implementation 'com.github.piasy:BigImageViewer:1.5.6'
     // load with fresco
     implementation 'com.github.piasy:FrescoImageLoader:1.5.6'
     // support thumbnail, gif and webp with Fresco
     implementation 'com.github.piasy:FrescoImageViewFactory:1.5.6'
-    api('com.github.filippudak.progresspieview:library:1.0.4')
+    api 'com.github.filippudak.progresspieview:library:1.0.4'
     // MaterialDialogs - https://github.com/afollestad/material-dialogs
-//    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'
+    //    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     // AppIntro - https://github.com/paolorotolo/AppIntro
     implementation 'com.github.paolorotolo:appintro:v5.1.0'

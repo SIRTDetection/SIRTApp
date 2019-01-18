@@ -29,14 +29,20 @@ import java.util.Locale;
 
 public class ImageManager {
     private Context mContext;
+    public static String Filename;
 
     public ImageManager(Context context) {
         mContext = context;
     }
 
+    public static String getFileName() {
+        return Filename;
+    }
+
     public File createNewFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFilename = "JPEG_" + timeStamp + "-org";
+        Filename=imageFilename;
         if (isExternalStorageReadable() && isExternalStorageWritable()) {
             File storageDir = getExternalStorageDir();
             if (!storageDir.exists())
@@ -61,4 +67,5 @@ public class ImageManager {
         return Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
+
 }

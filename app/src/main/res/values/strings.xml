@@ -33,4 +33,8 @@
     Are enough permissions?</string>
     <string name="error_server_response">There was an error processing the image - maybe
         the format is not recognised</string>
+    <string name="cam">Camera</string>
+    <string name="gal">Gallery</string>
+
+    <string name="zoom">When an image appears, click on it to enlarge it</string>
 </resources>

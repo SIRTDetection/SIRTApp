@@ -1,5 +1,6 @@
 package sirtapp.sirtdetection.com.sirtapp.activities;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,9 +18,15 @@ import android.widget.ImageView;
 import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.fresco.FrescoImageLoader;
 
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -31,6 +38,7 @@ import sirtapp.sirtdetection.com.sirtapp.utils.images.ImageManager;
 import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressDialog;
 
 import static android.provider.MediaStore.EXTRA_OUTPUT;
+import static sirtapp.sirtdetection.com.sirtapp.utils.images.ImageManager.getExternalStorageDir;
 import static sirtapp.sirtdetection.com.sirtapp.utils.images.ImageUtils.getPathFromUri;
 
 public class MainActivity extends AppCompatActivity implements Button.OnClickListener {
@@ -61,8 +69,11 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
         mImageView = findViewById(R.id.image);
         Button galleryButton = findViewById(R.id.gallery);
 
+
         galleryButton.setOnClickListener(this);
         cameraButton.setOnClickListener(this);
+        mImageView.setOnClickListener(this);
+
     }
 
     @Override
@@ -88,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
     public void onImageDownloadCompleted(Bitmap imageBitmap, File source) {
         runOnUiThread(() -> {
             mImageView.setImageBitmap(imageBitmap);
-            File tempFile = new File(ImageManager.getExternalStorageDir(), source.getName().replace("-org", "-inf"));
+            File tempFile = new File(getExternalStorageDir(), source.getName().replace("-org", "-inf"));
             Log.d(TAG, tempFile.getAbsolutePath());
             if (mDialog != null)
                 mDialog.dismiss();
@@ -186,9 +197,44 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
                         break;
                     }
                 }
+           case R.id.image:
+               this.showZoom();
+               break;
             default:
                 Log.w(TAG, "Unhandled case at \"onClick\": " + view.toString());
                 break;
         }
+    }
+
+    private void showZoom() {
+        File storageDir = getExternalStorageDir();
+        File tempFile =this.lastFileModified(storageDir.getPath());
+        try {
+
+            Intent showBigImageIntent = new Intent(this, ImageViewer.class);
+            showBigImageIntent.putExtra("picture", tempFile);
+            startActivity(showBigImageIntent);
+        } catch (UndeclaredThrowableException e) {
+            Log.w(TAG, "Unexpected exception!", e);
+        }
+
+    }
+    public static File lastFileModified(String dir) {
+        File fl = new File(dir);
+        File[] files = fl.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return file.isFile();
+            }
+        });
+        long lastMod = Long.MIN_VALUE;
+        File choice = null;
+        for (File file : files) {
+            if (file.lastModified() > lastMod) {
+                choice = file;
+                lastMod = file.lastModified();
+            }
+        }
+        return choice;
+
     }
 }

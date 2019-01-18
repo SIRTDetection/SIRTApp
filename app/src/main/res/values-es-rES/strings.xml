@@ -16,4 +16,9 @@
     <string name="extra_permissions">Además, esta aplicación usará:\n\n  - Permisos de Internet (para subir/bajar contenido).\n  - Permisos de estado básicos del terminal (almacenamiento privado).\n  - Cámara: se usará tu aplicación de cámara preferida.</string>
     <string name="error_server_response">Ha habido un error al procesar la imagen - quizás no
         tiene un formato válido</string>
+    <string name="cam">Cámara</string>
+    <string name="gal">Galería</string>
+
+    <string name="zoom">Cuando aparezca una imagen, haz clic en ella para ampliarla</string>
+
 </resources>
