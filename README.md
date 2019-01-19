@@ -49,6 +49,6 @@ en la subcarpeta SirtApp.
 A continuaciòn y ya por último añadir los enlaces al javadoc con los comentarios del codigo y un enlace a un
 video que muestra el funcionamiento completo de la app:
 
-Javadoc:
+Javadoc: https://sirtdetection.github.io/SIRTApp/
 
-Video:
+Video: https://youtu.be/GT6wmwUySdg
