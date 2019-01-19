@@ -31,40 +31,40 @@ import sirtapp.sirtdetection.com.sirtapp.R;
 import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressPieIndicator;
 
 public class ImageViewer extends AppCompatActivity implements ImageSaveCallback {
-  private BigImageView mImageView;
-  private File mImageFile;
+    private BigImageView mImageView;
+    private File mImageFile;
 
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    BigImageViewer.initialize(FrescoImageLoader.with(this));
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        BigImageViewer.initialize(FrescoImageLoader.with(this));
 
-    setContentView(R.layout.image_displayer);
-    mImageView = findViewById(R.id.mBigImage);
-    mImageView.setImageViewFactory(new FrescoImageViewFactory());
-    mImageView.setImageSaveCallback(this);
-    mImageView.setOptimizeDisplay(true);
-    mImageView.setProgressIndicator(new ProgressPieIndicator());
-    mImageFile = (File) getIntent().getSerializableExtra("picture");
-  }
+        setContentView(R.layout.image_displayer);
+        mImageView = findViewById(R.id.mBigImage);
+        mImageView.setImageViewFactory(new FrescoImageViewFactory());
+        mImageView.setImageSaveCallback(this);
+        mImageView.setOptimizeDisplay(true);
+        mImageView.setProgressIndicator(new ProgressPieIndicator());
+        mImageFile = (File) getIntent().getSerializableExtra("picture");
+    }
 
-  @Override
-  protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    displayImage();
-  }
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        displayImage();
+    }
 
-  public void displayImage() {
-    mImageView.showImage(Uri.fromFile(mImageFile), Uri.fromFile(mImageFile));
-  }
+    public void displayImage() {
+        mImageView.showImage(Uri.fromFile(mImageFile), Uri.fromFile(mImageFile));
+    }
 
-  @Override
-  public void onSuccess(String uri) {
+    @Override
+    public void onSuccess(String uri) {
 
-  }
+    }
 
-  @Override
-  public void onFail(Throwable t) {
+    @Override
+    public void onFail(Throwable t) {
 
-  }
+    }
 }
