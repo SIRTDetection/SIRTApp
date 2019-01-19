@@ -1,0 +1,67 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "sirtapp.sirtdetection.com.sirtapp"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 25
+        versionName "1.0b"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildToolsVersion '28.0.3'
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // Android X - AppCompat libraries
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+    implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0-alpha01'
+    implementation 'androidx.exifinterface:exifinterface:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.versionedparcelable:versionedparcelable:1.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    // Apache Commons IO - https://commons.apache.org/io/
+    implementation 'commons-io:commons-io:2.6'
+    // BigImageViewer - https://github.com/Piasy/BigImageViewer
+    implementation 'com.github.piasy:BigImageViewer:1.5.6'
+    // load with fresco
+    implementation 'com.github.piasy:FrescoImageLoader:1.5.6'
+    // support thumbnail, gif and webp with Fresco
+    implementation 'com.github.piasy:FrescoImageViewFactory:1.5.6'
+    api 'com.github.filippudak.progresspieview:library:1.0.4'
+    // MaterialDialogs - https://github.com/afollestad/material-dialogs
+    //    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    // AppIntro - https://github.com/paolorotolo/AppIntro
+    implementation 'com.github.paolorotolo:appintro:v5.1.0'
+    // ThreadingTools - https://github.com/Javinator9889/ThreadingTools
+    implementation 'com.github.javinator9889:threadingtools:1.0'
+}
