@@ -51,7 +51,9 @@ import androidx.annotation.NonNull;
 import sirtapp.sirtdetection.com.sirtapp.R;
 import sirtapp.sirtdetection.com.sirtapp.activities.MainActivity;
 import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressDialog;
-
+/**
+ * Esta clase lleva a cabo las conexiones necesarias entre la app y el servidor
+ */
 public class Connection implements OnThreadCompletedListener {
     public static final String BASE_URL = "https://vpnservice.ddns.net/flsk";
     private static final String TAG = "Connection";
@@ -74,6 +76,9 @@ public class Connection implements OnThreadCompletedListener {
         mDialog = dialog;
         obtainToken(deviceUuid);
     }
+    /**
+     * Este metodo obtiene el token y lo guarda en la sharedpreferences
+     */
 
     public void obtainToken(@NonNull String deviceUuid) {
         NotifyingThread connectionThread = new NotifyingThread(() -> {
@@ -110,12 +115,12 @@ public class Connection implements OnThreadCompletedListener {
         connectionThread.setName("connectionThread");
         connectionThread.start();
     }
-
+    /**
+     * Este otro lo que hace es cread el thread para subir la imagen, cosa que hara el siguiente, despues de subir y verificar
+     * que el token es correcto
+     */
     public void uploadPicture() {
         NotifyingThread httpsThread = new NotifyingThread(this);
-//        ArgumentParser parser = new ArgumentParser(3);
-//        parser.putParam("file", imageFile);
-//        parser.putParam("dialog", dialog);
         mResult = new AtomicReference<>();
         httpsThread.setExecutable(this::uploadPictureTask, mResult);
         httpsThread.setName("httpsThread");
@@ -171,16 +176,7 @@ public class Connection implements OnThreadCompletedListener {
     }
 
     /**
-     * When a thread finish its execution, if using a {@link NotifyingThread} and the class is
-     * subscribed, this method is called, with the {@code Runnable} which corresponds the just
-     * finished thread, and the {@code Throwable} containing the exception (if any exception has
-     * benn thrown).
-     * <p>
-     * Refer to {@link NotifyingThread#addOnThreadCompletedListener(OnThreadCompletedListener)} for
-     * getting more information about subscribing classes.
-     *
-     * @param thread    the thread that has just finished its execution.
-     * @param exception the exception if happened, else {@code null}.
+     * Aqui dependiendo del thread que se vaya a ejecutar se llamaran a unos metodos u otros
      */
     @Override
     public void onThreadCompletedListener(@NotNull Thread thread, @Nullable Throwable exception) {

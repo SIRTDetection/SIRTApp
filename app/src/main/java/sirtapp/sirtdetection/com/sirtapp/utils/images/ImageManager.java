@@ -26,23 +26,19 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+/**
+ * Esta clase guarda las imagenes que le llegan en el dispositivo con el metodo createNewFile
+ */
 
 public class ImageManager {
     private Context mContext;
-    public static String Filename;
 
     public ImageManager(Context context) {
         mContext = context;
     }
-
-    public static String getFileName() {
-        return Filename;
-    }
-
     public File createNewFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFilename = "JPEG_" + timeStamp + "-org";
-        Filename=imageFilename;
         if (isExternalStorageReadable() && isExternalStorageWritable()) {
             File storageDir = getExternalStorageDir();
             if (!storageDir.exists())
@@ -52,7 +48,10 @@ public class ImageManager {
         } else
             throw new IOException("Insufficient permissions");
     }
-
+    /**
+     * Estos metodos lo que hacen es, respectivamente, conseguir la direccion de almacenamiento y comprobar si se tienen los permisos
+     * para escribir y leer en el dispositivo
+     */
     public static File getExternalStorageDir() {
         return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "SIRTApp");
     }

@@ -35,9 +35,13 @@ import java.util.UUID;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import sirtapp.sirtdetection.com.sirtapp.R;
-
+/**
+ * Esta clase es la que ejecuta la introduccion que se ve la primera vez que se ejecuta la aplicación
+ */
 public class IntroActivity extends AppIntro {
-
+    /**
+     * Este metodo crea la actividad y basicamente lo que vemos en ella
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +84,10 @@ public class IntroActivity extends AppIntro {
 
         showSkipButton(false);
     }
-
+    /**
+     * Estos metodos son los que nos permiten interactuar con dicha actividad, asi como preguntarnos si concedemos los permisos e
+     * iniciar la actividad principal
+     */
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -90,11 +97,7 @@ public class IntroActivity extends AppIntro {
         } catch (NullPointerException ignored) {}
     }
 
-    /**
-     * Called when the user clicked the done button
-     *
-     * @param currentFragment Instance of the currently displayed fragment
-     */
+
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);

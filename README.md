@@ -30,4 +30,25 @@ proceso o, como dice el mensaje explicativo, como ya está la imagen arriba de l
 sobre ella para volver a ponerla en grande.
 
 Pasamos ahora a explicar el funcionamiento interno de la app, cuando el usuario saca una foto o la coge de
-la galeria la app...
+la galería la app lo primero que hace es solicitarle un token al servidor, este se lo da siempre y cuando se
+haya perdido correctamente, esto ha sido implementado como medida de seguridad para que nadie ajeno a la app
+pueda hacer uso del servidor, si todo a ido bien, la app manda ese token, que ha almacenado en las sharedpreferences,
+ y el servidor comprueba si es correcto, si es asi la app manda ya la imagen, el servidor la procesa(se explicará
+como en la parted del server) y devuelve la imagen resultado, todo esto haciendo uso de JSONS y tratando las imágenes
+como bitmaps y en algunos casos como ImagenUri, ya con la imagen de respuesta en poder de la app, esta inicia una
+nueva actividad en la que muestra la imagen en grande y en la que gracias a una serie de metodos que estan en la clase
+asociada a dicha actividad (ImageViewer) podemos hacer zoom sobre ella, si le damos a la tecla de retorno
+del movil nos volvera a mostrar la actividad principal debido a que hemos cerrado la actividad de la imagen en grande,
+pero ahora, ademas de poder escoger otra imagen y volver a empezar el proceso, podemos clikar en el pequeño
+imageViewer que sale arriba de la actividad y se volvera a abrir la imagen en grande, para ello lo que app hace es
+inicar de nuevo dicha actividad de la imagen en grande y cargar la ultima imagen modifica que se encuentra en el
+almacenamiento del dispositivo. Aprovecho esta última aclaración para destacar que la app guarda las imaganes resultado
+que le duvuelve el servidor y que las podemos encontrar en el amacenamiento interno del dispositivo en la carpeta Pictures
+en la subcarpeta SirtApp.
+
+A continuaciòn y ya por último añadir los enlaces al javadoc con los comentarios del codigo y un enlace a un
+video que muestra el funcionamiento completo de la app:
+
+Javadoc:
+
+Video:

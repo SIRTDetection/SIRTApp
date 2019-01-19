@@ -30,6 +30,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import sirtapp.sirtdetection.com.sirtapp.R;
 import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressPieIndicator;
 
+/**
+ * Esta clase es la vinculada a la actividad que muestra la imagen en grande
+ */
 public class ImageViewer extends AppCompatActivity implements ImageSaveCallback {
     private BigImageView mImageView;
     private File mImageFile;

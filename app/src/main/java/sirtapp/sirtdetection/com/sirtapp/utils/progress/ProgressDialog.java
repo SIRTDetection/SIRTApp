@@ -25,7 +25,10 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
-
+/**
+ * Esta clase nos muestra los textos del progreso en la notificacion de que esta haciendo la app y el servidor
+ * entre que se hace la foto hasta que nos muestra la imagen de respuesta y colabora con la clase ProgressPieIndicator
+ */
 public class ProgressDialog {
     private MaterialDialog mDialog;
 

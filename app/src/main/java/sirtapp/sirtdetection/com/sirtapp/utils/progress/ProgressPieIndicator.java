@@ -28,7 +28,7 @@ import java.util.Locale;
 import sirtapp.sirtdetection.com.sirtapp.R;
 
 /**
- * Created by Piasy{github.com/Piasy} on 12/11/2016.
+ * Esta clase nos permite ver la barra que sale en la zona de progreso mientras el servidor procesa la imagen
  */
 
 public class ProgressPieIndicator implements ProgressIndicator {
@@ -43,7 +43,7 @@ public class ProgressPieIndicator implements ProgressIndicator {
 
     @Override
     public void onStart() {
-        // not interested
+        // no nos interesa
     }
 
     @Override

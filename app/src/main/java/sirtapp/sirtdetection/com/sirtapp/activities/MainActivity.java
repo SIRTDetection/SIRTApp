@@ -1,9 +1,9 @@
 package sirtapp.sirtdetection.com.sirtapp.activities;
 
-import android.annotation.SuppressLint;
+
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -14,32 +14,25 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-
-import com.github.piasy.biv.BigImageViewer;
-import com.github.piasy.biv.loader.fresco.FrescoImageLoader;
-
-import org.apache.commons.io.comparator.LastModifiedFileComparator;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Arrays;
 import java.util.UUID;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import sirtapp.sirtdetection.com.sirtapp.R;
 import sirtapp.sirtdetection.com.sirtapp.net.Connection;
 import sirtapp.sirtdetection.com.sirtapp.utils.images.ImageManager;
 import sirtapp.sirtdetection.com.sirtapp.utils.progress.ProgressDialog;
-
 import static android.provider.MediaStore.EXTRA_OUTPUT;
 import static sirtapp.sirtdetection.com.sirtapp.utils.images.ImageManager.getExternalStorageDir;
 import static sirtapp.sirtdetection.com.sirtapp.utils.images.ImageUtils.getPathFromUri;
+
+/**
+ * Esta clase es el main principal desde donde se ejecutaran todos los procesos centrales que componen la app
+ */
 
 public class MainActivity extends AppCompatActivity implements Button.OnClickListener {
     private static final short INTENT_OPEN_GALLERY = 1;
@@ -75,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
         mImageView.setOnClickListener(this);
 
     }
+    /**
+     * Este metodo es el que decide que metodo se ejecutara dependiendo del intent
+     */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -95,7 +91,9 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
             }
         }
     }
-
+    /**
+     * Este ejecuta el guardado de la imagen descargada del servidor e inicia la actividad que la mostrará
+     */
     public void onImageDownloadCompleted(Bitmap imageBitmap, File source) {
         runOnUiThread(() -> {
             mImageView.setImageBitmap(imageBitmap);
@@ -124,7 +122,9 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
             }
         });
     }
-
+    /**
+     * Estos metodos colaboran para subir la imagen al servidor sube la imagen al servidor
+     */
     private void uploadImage(File imageFile) {
         Connection connection = new Connection(this);
         mDialog = new ProgressDialog(this,
@@ -132,8 +132,6 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
                 R.string.dialog_content_1);
         mDialog.show();
         connection.startInference(mUUID, imageFile, mDialog, this);
-//        connection.obtainToken(mUUID);
-//        connection.uploadPicture(imageFile, mDialog, this);
     }
 
     private void loadImage(Intent data) {
@@ -155,10 +153,10 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
     }
 
     /**
-     * Called when a view has been clicked.
-     *
-     * @param view The view that was clicked.
+     * Dependiendo de que boton se halla pulsado en pantalla iniciara un intent u otro o en el caso de pulsar la imagen llamará
+     * al mnetodo que la mostrara por pantalla
      */
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -205,7 +203,10 @@ public class MainActivity extends AppCompatActivity implements Button.OnClickLis
                 break;
         }
     }
-
+    /**
+     * El primero de estos metodos es para poder mostrar la foto en grande, el segundo le dice al primero cual es el archivo que debe
+     * abrir, en este caso, el ultimo guardado en el dispositivo
+     */
     private void showZoom() {
         File storageDir = getExternalStorageDir();
         File tempFile =this.lastFileModified(storageDir.getPath());
