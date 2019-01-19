@@ -26,7 +26,6 @@ import android.util.Log;
 
 import com.github.javinator9889.threading.threads.notifyingthread.NotifyingThread;
 import com.github.javinator9889.threading.threads.notifyingthread.OnThreadCompletedListener;
-import com.github.javinator9889.utils.ArgumentParser;
 
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -153,9 +152,9 @@ public class Connection implements OnThreadCompletedListener {
             request.write(FileUtils.readFileToByteArray(mImageFile));
             request.writeBytes("\r\n");
             request.writeBytes("--" + boundary + "--\r\n");
-            mInstance.runOnUiThread(() -> mDialog.updateBody(R.string.dialog_content_3));
             request.flush();
             Log.d(TAG, "Data uploaded!");
+            mInstance.runOnUiThread(() -> mDialog.updateBody(R.string.dialog_content_3));
 
             int response = connection.getResponseCode();
             Log.d(TAG, "Server response: " + response);

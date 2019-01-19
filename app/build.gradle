@@ -6,8 +6,8 @@ android {
         applicationId "sirtapp.sirtdetection.com.sirtapp"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 25
-        versionName "1.0b"
+        versionCode 26
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -17,7 +17,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
